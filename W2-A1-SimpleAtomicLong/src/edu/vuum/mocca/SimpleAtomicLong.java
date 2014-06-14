@@ -28,12 +28,13 @@ class SimpleAtomicLong {
 	 */
 	public SimpleAtomicLong(long initialValue) {
 		// TODO -- you fill in here
-		mRWLock.writeLock().lock();
-		try {
-			mValue = initialValue;
-		} finally {
-			mRWLock.writeLock().unlock();
-		}
+		// mRWLock.writeLock().lock();
+		// try {
+		mValue = initialValue;
+		// } finally {
+		// mRWLock.writeLock().unlock();
+		// }
+		// officehours: no need of lock here!
 	}
 
 	/**
@@ -52,6 +53,21 @@ class SimpleAtomicLong {
 			mRWLock.readLock().unlock();
 		}
 		return value;
+		// another way here would be to define the value as volatile
+		// it would not be cached and therefore no need for locking in get()
+		// But prof Schmidt prefers not to use synchronized unless there is a
+		// good reason
+
+		/*
+		 * Its also fine to do try{ ..., return x} finally {lock.unlock()}
+		 * because finally is executed after the try block but bbefore control
+		 * passes to the following statements --from SO
+		 */
+
+		/*
+		 * Also, without returning mValue implicitly reads without lock, so its
+		 * bad
+		 */
 	}
 
 	/**

@@ -27,9 +27,9 @@ public class SimpleSemaphore {
 	 */
 	// TODO - you fill in here. Make sure that this data member will
 	// ensure its values aren't cached by multiple Threads..
-	volatile int availablePermits;
+	volatile int mAvailablePermits;
 
-	public SimpleSemaphore(int permits, boolean fair) {
+	public SimpleSemaphore(int initialPermits, boolean fair) {
 		// TODO - you fill in here to initialize the SimpleSemaphore,
 		// making sure to allow both fair and non-fair Semaphore
 		// semantics.
@@ -37,7 +37,7 @@ public class SimpleSemaphore {
 		mCondition = mLock.newCondition();
 		// Prof. Schmidt mentioned in the officehours that the constructor need
 		// not be locked for this operation
-		availablePermits = permits;
+		mAvailablePermits = initialPermits;
 	}
 
 	/**
@@ -46,12 +46,12 @@ public class SimpleSemaphore {
 	 */
 	public void acquire() throws InterruptedException {
 		// TODO - you fill in here.
+		mLock.lockInterruptibly();
 		try {
-			mLock.lockInterruptibly();
-			while (this.availablePermits() < 1) {
+			while (mAvailablePermits < 1) {
 				mCondition.await();
 			}
-			--availablePermits;
+			--mAvailablePermits;
 		} finally {
 			mLock.unlock();
 		}
@@ -63,12 +63,12 @@ public class SimpleSemaphore {
 	 * interrupted.
 	 */
 	public void acquireUninterruptibly() {
+		mLock.lock();
 		try {
-			mLock.lock();
 			while (this.availablePermits() < 1) {
 				mCondition.awaitUninterruptibly();
 			}
-			--availablePermits;
+			--mAvailablePermits;
 		} finally {
 			mLock.unlock();
 		}
@@ -78,9 +78,9 @@ public class SimpleSemaphore {
 	 * Return one permit to the semaphore.
 	 */
 	void release() {
+		mLock.lock();
 		try {
-			mLock.lock();
-			++availablePermits;
+			++mAvailablePermits;
 			mCondition.signal(); // this will tell one
 		} finally {
 			mLock.unlock();
@@ -93,6 +93,6 @@ public class SimpleSemaphore {
 	public int availablePermits() {
 		// TODO - you fill in here by changing null to the appropriate
 		// return value.
-		return availablePermits; // volatile, therefore doesn't need a lock.
+		return mAvailablePermits; // volatile, therefore doesn't need a lock.
 	}
 }
