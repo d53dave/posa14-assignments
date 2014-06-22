@@ -75,12 +75,19 @@ public class PingPongRight {
 			 * This method runs in a separate thread of control and implements
 			 * the core ping/pong algorithm.
 			 */
-			for (int i = 1; i < mMaxLoopIterations + 1; ++i) {
-				this.acquire();
-				System.out.println(stringToPrint + "(" + i + ")");
-				this.release();
+			try {
+				for (int i = 1; i < mMaxLoopIterations + 1; ++i) {
+					this.acquire();
+					System.out.println(stringToPrint + "(" + i + ")");
+					this.release();
+				}
+			} finally {
+				mLatch.countDown();
 			}
-			mLatch.countDown();
+
+			// added try finally to ensure that the countdown will occur, even
+			// if in this
+			// particulat example it is not necessary
 		}
 
 		/**
